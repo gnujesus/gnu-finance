@@ -1,9 +1,11 @@
 package data
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
+	"strconv"
+
+	"encoding/json"
 	"net/http"
 )
 
@@ -53,15 +55,36 @@ func (a AlphaVantage) Fetch(q Query) (CompanyInfo, error) {
 		return CompanyInfo{}, err
 	}
 
-	// TODO: REMEMBER TO PARSE THE TIMESERIES SINCE IT IS A STRING IN THE RES, BUT 
-	FLOAT IN THE MODEL
-	 
+	// TODO: REMEMBER TO PARSE THE TIMESERIES SINCE IT IS A STRING IN THE RES, BUT
+	// FLOAT IN THE MODEL
+
+	history := []PricePoint{}
+
+	for date, point := range raw.TimeSeries {
+		// using openP because close is a reserved keyword, so I use P on open just to make it a convention between
+		// open and close. This will only be used here and when a loop is needed. Don't mind it too much.
+		openP, _ := strconv.ParseFloat(point.Open, 64)
+		high, _ := strconv.ParseFloat(point.High, 64)
+		low, _ := strconv.ParseFloat(point.Low, 64)
+		closeP, _ := strconv.ParseFloat(point.Close, 64)
+		volume, _ := strconv.ParseInt(point.Volume, 10, 64)
+
+		history = append(history, PricePoint{
+			Date:   date,
+			Open:   openP,
+			High:   high,
+			Low:    low,
+			Close:  closeP,
+			Volume: volume,
+		})
+	}
+
 	return CompanyInfo{
 		Name:          "Filler",
 		Symbol:        raw.MetaData.Symbol,
 		LastRefreshed: raw.MetaData.LastRefreshed,
 		TimeZone:      raw.MetaData.TimeZone,
-		PriceHistory:  raw.TimeSeries,
+		PriceHistory:  history,
 	}, nil
 
 }
