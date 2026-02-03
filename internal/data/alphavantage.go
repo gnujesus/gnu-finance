@@ -55,9 +55,6 @@ func (a AlphaVantage) Fetch(q Query) (CompanyInfo, error) {
 		return CompanyInfo{}, err
 	}
 
-	// TODO: REMEMBER TO PARSE THE TIMESERIES SINCE IT IS A STRING IN THE RES, BUT
-	// FLOAT IN THE MODEL
-
 	history := []PricePoint{}
 
 	for date, point := range raw.TimeSeries {
