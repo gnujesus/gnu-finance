@@ -18,5 +18,5 @@ func Init() Config {
 		log.Fatal("Error loading .env file")
 	}
 
-	return Config{ApiKey: os.Getenv("ApiKey")}
+	return Config{ApiKey: os.Getenv("API_KEY")}
 }
