@@ -48,6 +48,8 @@ func (a AlphaVantage) Fetch(q Query) (CompanyInfo, error) {
 		return CompanyInfo{}, err
 	}
 
+	defer res.Body.Close()
+
 	var raw alphaResponse
 	err = json.NewDecoder(res.Body).Decode(&raw)
 	if err != nil {
