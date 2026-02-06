@@ -1,47 +1,45 @@
 package ui
 
 import (
-	"os"
+	"github.com/gnujesus/gnu-finance/internal/data"
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
-	"github.com/gnujesus/gnu-finance/internal/data"
+	"os"
 )
 
 func GraphView(company data.CompanyInfo) error {
-	// Create a new line chart
-	line := charts.NewLine()
-	
-	// Set global options
-	line.SetGlobalOptions(
+	kline := charts.NewKLine()
+
+	kline.SetGlobalOptions(
 		charts.WithTitleOpts(opts.Title{
 			Title:    company.Symbol + " Stock Price",
-			Subtitle: "Close prices over time",
+			Subtitle: "Daily OHLC",
 		}),
+		// Adding a Tooltip and DataZoom makes stock charts much more usable
+		charts.WithTooltipOpts(opts.Tooltip{Show: opts.Bool(true), Trigger: "axis"}),
+		charts.WithDataZoomOpts(opts.DataZoom{Type: "slider"}),
 	)
-	
-	// Prepare data
+
 	dates := make([]string, 0)
-	prices := make([]opts.LineData, 0)
-	
+	klineData := make([]opts.KlineData, 0)
+
 	for _, point := range company.PriceHistory {
-
 		dates = append(dates, point.Date)
-		prices = append(prices, opts.LineData{Value: point.Close})
+		// Correctly pass [Open, Close, Low, High]
+
+		klineData = append(klineData, opts.KlineData{
+			Value: []interface{}{point.Open, point.Close, point.Low, point.High},
+		})
 	}
-	
-	// Add data to chart
-	line.SetXAxis(dates).
-		AddSeries("Close Price", prices).
 
-		SetSeriesOptions(charts.WithLineChartOpts(opts.LineChart{Smooth: opts.Bool(true)}))
-	
+	kline.SetXAxis(dates).
+		AddSeries("Price", klineData)
 
-	// Render to HTML file
 	f, err := os.Create("stock_chart.html")
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-	
-	return line.Render(f)
+
+	return kline.Render(f)
 }

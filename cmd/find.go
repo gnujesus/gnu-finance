@@ -59,6 +59,7 @@ var findCmd = &cobra.Command{
 			tui.DetailedView(m.Company)
 
 		case 2:
+			// TODO: CURRENTLY NOT WORKING
 			ui.GraphView(m.Company)
 			exec.Command("open", "stock_charts.html").Start()
 
@@ -66,7 +67,7 @@ var findCmd = &cobra.Command{
 			os.Exit(0)
 
 		default:
-			fmt.Println("xd")
+			fmt.Println("Default behavior")
 		}
 
 		if _, err := p.Run(); err != nil {
